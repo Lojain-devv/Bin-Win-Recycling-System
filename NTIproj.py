@@ -1,386 +1,7 @@
 # Bin&Win - Recycling System 
 
-#System
-
-import re
-
-class RecyclingSystem:
-
-    def __init__(self):
-        self.users = {}
-        self.collectors = {}
-        self.rewards = {}
-        self.waste_types = {}
-        self.recycling_requests = []
-
-        self.load_users()
-        self.load_collectors()
-        self.load_rewards()
-        self.load_waste_types()
-
-
-    def load_users(self):
-        self.users = {
-            "Ahmed": User("Ahmed", "1234", "0654321",
-                          "Ahmed@gmail.com", "Cairo", 500),
-
-            "Aly": User("Aly", "5678", "0123456",
-                        "Aly@gmail.com", "Alex", 1000),
-
-            "Sherif": User("Sherif", "121314", "0345678",
-                           "Sherif@gmail.com", "Aswan", 200)}
-
-
-    def load_collectors(self):
-        self.collectors = {"collector1": Collector("collector1", "c10123", "01234567891"),
-                           "collector2": Collector("collector2", "c20124", "01234567892"),
-                           "collector3": Collector("collector3", "c30125", "01234567893")}
-
-
-    def load_rewards(self):
-        self.rewards = {
-            1: Reward(1, "Reusable Bag", 50),
-            2: Reward(2, "10% Discount", 100),
-            3: Reward(3, "20 EGP Voucher", 200),
-            4: Reward(4, "Free Shipping", 500),
-            5: Reward(5, "Gift Card", 1000)}
-
-
-    def load_waste_types(self):
-        self.waste_types = {"paper": Waste("paper", 2),
-                            "plastic": Waste("plastic", 3),
-                            "metal": Waste("metal", 6),
-                            "glass": Waste("glass", 4)}
-
-
-    def register(self):
-
-        username = input("\nEnter username: ")
-
-        if username in self.users:
-            print("\nUsername already exists!")
-            return
-
-        password = input("Enter password: ")
-
-        while not (
-            len(password) >= 8
-            and re.search(r'[A-Z]', password)
-            and re.search(r'[a-z]', password)
-            and re.search(r'\d', password)
-            and re.search(r'[!@#$%^&*]', password)):
-
-            print("\nPassword must be at least 8 characters, contain uppercase, lowercase, digit, and [!@#$%^&*].")
-
-            password = input("Enter password again: ")
-
-        phone = input("Enter phone number: ")
-
-        while not phone.isdigit():
-
-            print("\nInvalid phone number!")
-            phone = input("Enter phone number again: ")
-
-        email = input("Enter email: ")
-
-        while "@" not in email or "." not in email:
-
-            print("\nInvalid email!")
-            email = input("Enter email again: ")
-
-        address = input("Enter address: ")
-
-        while not address.strip():
-
-            print("\nAddress cannot be empty!")
-            address = input("Enter address again: ")
-
-        self.users[username] = User(username, password, phone, email, address)
-
-        print("\nAccount created successfully at Bin&Win!\n")
-
-
-    def login(self):
-
-        username = input("\nEnter username: ")
-
-        if username not in self.users:
-            print("\nUsername not found!\n")
-            return None
-
-        user = self.users[username]
-
-        max_attempts = 3
-        attempts_made = 0
-
-        print("\nYou have 3 attempts to enter your password")
-
-        while attempts_made < max_attempts:
-
-            password = input("Enter your password: ")
-            attempts_made += 1
-
-            if user.check_password(password):
-
-                print("\nPassword accepted!")
-                print("\nLogin successful! Hello", username)
-
-                return user
-
-            print("\nIncorrect password!")
-
-            remaining = max_attempts - attempts_made
-
-            if remaining > 0:
-                print(f"\nYou have {remaining} attempts left.")
-
-        print("You have reached maximum attempts. Access denied.\n")
-
-        return None
-
-
-    def collector_login(self):
-
-        username = input("\nEnter your username: ")
-
-        if username not in self.collectors:
-            print("\nUser not found\n")
-            return None
-
-        collector = self.collectors[username]
-
-        max_attempts = 3
-        attempts_made = 0
-
-        print("\nYou have 3 attempts to enter your password")
-
-        while attempts_made < max_attempts:
-
-            password = input("Enter your password: ")
-            attempts_made += 1
-
-            if collector.check_password(password):
-
-                print("\nWelcome collector!")
-
-                return collector
-
-            print("\nIncorrect password!")
-
-            remaining = max_attempts - attempts_made
-
-            if remaining > 0:
-                print(f"You have {remaining} attempts left.")
-
-        print("You have reached maximum attempts. Access denied.\n")
-
-        return None
-    
-
-#L1
-    def choose_waste_type(self):
-
-        print("\n=== WASTE TYPE ===\n")
-
-        waste_list = list(self.waste_types.keys())
-
-        for c in range(len(waste_list)):
-
-            waste = self.waste_types[waste_list[c]]
-
-            print(
-                f"{c + 1} - "
-                f"{waste.name} -> "
-                f"{waste.points_per_piece} points/piece"
-            )
-
-        try:
-
-            choice = int(input("\nChoose waste type: "))
-
-            if choice < 1 or choice > len(waste_list):
-                print("\nInvalid waste type!")
-                return None
-
-            return waste_list[choice - 1]
-
-        except ValueError:
-
-            print("\nPlease, enter a number.")
-            return None
-
-
-    def enter_quantity(self):
-
-        try:
-
-            quantity = int(input("\nEnter quantity: "))
-
-            if quantity <= 0:
-                print("\nInvalid quantity!")
-                return None
-
-            return quantity
-
-        except ValueError:
-
-            print("\nPlease, enter a number.")
-            return None
-
-
-    def calculate_points(self, waste_name, quantity):
-
-        return self.waste_types[waste_name].calculate_points(quantity)
-
-
-    def show_rewards(self):
-
-        print("\n===== REWARDS =====\n")
-
-        for reward in self.rewards.values():
-            reward.show()
-
-
-    def recycling_menu(self, user):
-
-        while True:
-
-            print("\n==== RECYCLING MENU ====")
-
-            print("\n1. Drop off waste at machine")
-            print("2. Request collector for delivery")
-            print("3. Confirm machine recycling")
-            print("4. View requests")
-            print("5. Back to user menu")
-
-            choice = input("\nChoose: ")
-
-            if choice == "1":
-                user.recycling_request(self)
-
-            elif choice == "2":
-                user.delivery_request(self)
-
-            elif choice == "3":
-                user.confirm_machine_request(self)
-
-            elif choice == "4":
-                user.view_requests(self)
-
-            elif choice == "5":
-                break
-
-            else:
-                print("Invalid choice!")
-
-
-    def user_menu(self, user):
-
-        while True:
-
-            print("\n===== USER MENU =====")
-
-            print("\n1. Show Profile")
-            print("2. Show Rewards")
-            print("3. Redeem Reward")
-            print("4. Recycling Menu")
-            print("5. User History")
-            print("6. Logout")
-
-            choice = input("\nChoose: ")
-
-            if choice == "1":
-                user.show_profile()
-
-            elif choice == "2":
-                self.show_rewards()
-
-            elif choice == "3":
-                user.redeem_reward(self.rewards)
-
-            elif choice == "4":
-                self.recycling_menu(user)
-
-            elif choice == "5":
-                user.user_history(self)
-
-            elif choice == "6":
-                print("\nLogged out. Thank you for visiting!!\n")
-                break
-
-            else: print("Invalid choice!")
-
-
-    def collector_menu(self, collector):
-
-        while True:
-
-            print("\n===== COLLECTOR MENU =====\n")
-
-            print("1. View Pending Requests")
-            print("2. Confirm Delivery Request")
-            print("3. Reject Delivery Request")
-            print("4. Logout")
-
-            choice = input("\nChoose: ")
-
-            if choice == "1":
-                collector.view_pending_requests(self)
-
-            elif choice == "2":
-                collector.confirm_request(self)
-
-            elif choice == "3":
-                collector.reject_request(self)
-
-            elif choice == "4":
-                print("\nLogged out. Thank you!\n")
-                break
-
-            else: print("Invalid choice!")
-
-
-    def run(self):
-
-        while True:
-
-            print("\n== Bin&Win ==\n")
-
-            print("1. Register")
-            print("2. Customer Login")
-            print("3. Collector Login")
-            print("4. Exit")
-
-            choice = input("\nChoose Option: ")
-
-            if choice == "1":
-
-                self.register()
-
-            elif choice == "2":
-
-                user = self.login()
-
-                if user is not None:
-                    self.user_menu(user)
-
-            elif choice == "3":
-
-                collector = self.collector_login()
-
-                if collector is not None:
-                    self.collector_menu(collector)
-
-            elif choice == "4":
-
-                print("\nGoodbye! Thank you for visiting Bin&Win.")
-                break
-
-            else: print("\nInvalid choice!")
-
-
-
 #Person
+import re
 
 class Person:
 
@@ -492,13 +113,7 @@ class User(Person):
 
         points = system.calculate_points(waste_name, quantity)
 
-        request = RecyclingRequest(
-            self.username,
-            waste_name,
-            quantity,
-            points,
-            "Machine"
-        )
+        request = RecyclingRequest(self.username, waste_name, quantity, points, "Machine")
 
         system.recycling_requests.append(request)
 
@@ -530,15 +145,7 @@ class User(Person):
 
         points = system.calculate_points(waste_name, quantity)
 
-        request = RecyclingRequest(
-            self.username,
-            waste_name,
-            quantity,
-            points,
-            "Delivery",
-            self.phone,
-            self.address
-        )
+        request = RecyclingRequest(self.username, waste_name, quantity, points, "Delivery", self.phone, self.address)
 
         system.recycling_requests.append(request)
 
@@ -651,8 +258,7 @@ class User(Person):
         if not found:
             print("\nNo history found.")
 
-        
-#L2
+
 #Person : Collector  
 
 class Collector(Person):
@@ -888,6 +494,377 @@ class RecyclingRequest:
             print(f"Phone: {self.phone}")
             print(f"Address: {self.address}")
         print(f"Status: {self.status}")
+
+
+#System
+
+class RecyclingSystem:
+
+    def __init__(self):
+        self.users = {}
+        self.collectors = {}
+        self.rewards = {}
+        self.waste_types = {}
+        self.recycling_requests = []
+
+        self.load_users()
+        self.load_collectors()
+        self.load_rewards()
+        self.load_waste_types()
+
+
+    def load_users(self):
+        self.users = {"Ahmed": User("Ahmed", "1234", "0654321",
+                                    "Ahmed@gmail.com", "Cairo", 500),
+
+                    "Aly": User("Aly", "5678", "0123456",
+                                "Aly@gmail.com", "Alex", 1000),
+
+                    "Sherif": User("Sherif", "121314", "0345678",
+                                   "Sherif@gmail.com", "Aswan", 200)}
+
+
+    def load_collectors(self):
+        self.collectors = {"collector1": Collector("collector1", "c10123", "01234567891"),
+                           "collector2": Collector("collector2", "c20124", "01234567892"),
+                           "collector3": Collector("collector3", "c30125", "01234567893")}
+
+
+    def load_rewards(self):
+        self.rewards = {
+            1: Reward(1, "Reusable Bag", 50),
+            2: Reward(2, "10% Discount", 100),
+            3: Reward(3, "20 EGP Voucher", 200),
+            4: Reward(4, "Free Shipping", 500),
+            5: Reward(5, "Gift Card", 1000)}
+
+
+    def load_waste_types(self):
+        self.waste_types = {"paper": Waste("paper", 2),
+                            "plastic": Waste("plastic", 3),
+                            "metal": Waste("metal", 6),
+                            "glass": Waste("glass", 4)}
+
+
+    def register(self):
+
+        username = input("\nEnter username: ")
+
+        if username in self.users:
+            print("\nUsername already exists!")
+            return
+
+        password = input("Enter password: ")
+
+        while not (
+            len(password) >= 8
+            and re.search(r'[A-Z]', password)
+            and re.search(r'[a-z]', password)
+            and re.search(r'\d', password)
+            and re.search(r'[!@#$%^&*]', password)):
+
+            print("\nPassword must be at least 8 characters, contain uppercase, lowercase, digit, and [!@#$%^&*].")
+
+            password = input("Enter password again: ")
+
+        phone = input("Enter phone number: ")
+
+        while not phone.isdigit():
+
+            print("\nInvalid phone number!")
+            phone = input("Enter phone number again: ")
+
+        email = input("Enter email: ")
+
+        while "@" not in email or "." not in email:
+
+            print("\nInvalid email!")
+            email = input("Enter email again: ")
+
+        address = input("Enter address: ")
+
+        while not address.strip():
+
+            print("\nAddress cannot be empty!")
+            address = input("Enter address again: ")
+
+        self.users[username] = User(username, password, phone, email, address)
+
+        print("\nAccount created successfully at Bin&Win!\n")
+
+
+    def login(self):
+
+        username = input("\nEnter username: ")
+
+        if username not in self.users:
+            print("\nUsername not found!\n")
+            return None
+
+        user = self.users[username]
+
+        max_attempts = 3
+        attempts_made = 0
+
+        print("\nYou have 3 attempts to enter your password")
+
+        while attempts_made < max_attempts:
+
+            password = input("Enter your password: ")
+            attempts_made += 1
+
+            if user.check_password(password):
+
+                print("\nPassword accepted!")
+                print("\nLogin successful! Hello", username)
+
+                return user
+
+            print("\nIncorrect password!")
+
+            remaining = max_attempts - attempts_made
+
+            if remaining > 0:
+                print(f"\nYou have {remaining} attempts left.")
+
+        print("You have reached maximum attempts. Access denied.\n")
+
+        return None
+
+
+    def collector_login(self):
+
+        username = input("\nEnter your username: ")
+
+        if username not in self.collectors:
+            print("\nUser not found\n")
+            return None
+
+        collector = self.collectors[username]
+
+        max_attempts = 3
+        attempts_made = 0
+
+        print("\nYou have 3 attempts to enter your password")
+
+        while attempts_made < max_attempts:
+
+            password = input("Enter your password: ")
+            attempts_made += 1
+
+            if collector.check_password(password):
+
+                print("\nWelcome collector!")
+
+                return collector
+
+            print("\nIncorrect password!")
+
+            remaining = max_attempts - attempts_made
+
+            if remaining > 0:
+                print(f"You have {remaining} attempts left.")
+
+        print("You have reached maximum attempts. Access denied.\n")
+
+        return None
+    
+
+    def choose_waste_type(self):
+
+        print("\n=== WASTE TYPE ===\n")
+
+        waste_list = list(self.waste_types.keys())
+
+        for c in range(len(waste_list)):
+
+            waste = self.waste_types[waste_list[c]]
+
+            print(f"{c + 1} - {waste.name} -> {waste.points_per_piece} points/piece")
+
+        try:
+
+            choice = int(input("\nChoose waste type: "))
+
+            if choice < 1 or choice > len(waste_list):
+                print("\nInvalid waste type!")
+                return None
+
+            return waste_list[choice - 1]
+
+        except ValueError:
+
+            print("\nPlease, enter a number.")
+            return None
+
+
+    def enter_quantity(self):
+
+        try:
+
+            quantity = int(input("\nEnter quantity: "))
+
+            if quantity <= 0:
+                print("\nInvalid quantity!")
+                return None
+
+            return quantity
+
+        except ValueError:
+
+            print("\nPlease, enter a number.")
+            return None
+
+
+    def calculate_points(self, waste_name, quantity):
+
+        return self.waste_types[waste_name].calculate_points(quantity)
+
+
+    def show_rewards(self):
+
+        print("\n===== REWARDS =====\n")
+
+        for reward in self.rewards.values():
+            reward.show()
+
+
+    def recycling_menu(self, user):
+
+        while True:
+
+            print("\n==== RECYCLING MENU ====")
+
+            print("\n1. Drop off waste at machine")
+            print("2. Request collector for delivery")
+            print("3. Confirm machine recycling")
+            print("4. View requests")
+            print("5. Back to user menu")
+
+            choice = input("\nChoose: ")
+
+            if choice == "1":
+                user.recycling_request(self)
+
+            elif choice == "2":
+                user.delivery_request(self)
+
+            elif choice == "3":
+                user.confirm_machine_request(self)
+
+            elif choice == "4":
+                user.view_requests(self)
+
+            elif choice == "5":
+                break
+
+            else:
+                print("Invalid choice!")
+
+
+    def user_menu(self, user):
+
+        while True:
+
+            print("\n===== USER MENU =====")
+
+            print("\n1. Show Profile")
+            print("2. Show Rewards")
+            print("3. Redeem Reward")
+            print("4. Recycling Menu")
+            print("5. User History")
+            print("6. Logout")
+
+            choice = input("\nChoose: ")
+
+            if choice == "1":
+                user.show_profile()
+
+            elif choice == "2":
+                self.show_rewards()
+
+            elif choice == "3":
+                user.redeem_reward(self.rewards)
+
+            elif choice == "4":
+                self.recycling_menu(user)
+
+            elif choice == "5":
+                user.user_history(self)
+
+            elif choice == "6":
+                print("\nLogged out. Thank you for visiting!!\n")
+                break
+
+            else: print("Invalid choice!")
+
+
+    def collector_menu(self, collector):
+
+        while True:
+
+            print("\n===== COLLECTOR MENU =====\n")
+
+            print("1. View Pending Requests")
+            print("2. Confirm Delivery Request")
+            print("3. Reject Delivery Request")
+            print("4. Logout")
+
+            choice = input("\nChoose: ")
+
+            if choice == "1":
+                collector.view_pending_requests(self)
+
+            elif choice == "2":
+                collector.confirm_request(self)
+
+            elif choice == "3":
+                collector.reject_request(self)
+
+            elif choice == "4":
+                print("\nLogged out. Thank you!\n")
+                break
+
+            else: print("Invalid choice!")
+
+
+    def run(self):
+
+        while True:
+
+            print("\n== Bin&Win ==\n")
+
+            print("1. Register")
+            print("2. Customer Login")
+            print("3. Collector Login")
+            print("4. Exit")
+
+            choice = input("\nChoose Option: ")
+
+            if choice == "1":
+
+                self.register()
+
+            elif choice == "2":
+
+                user = self.login()
+
+                if user is not None:
+                    self.user_menu(user)
+
+            elif choice == "3":
+
+                collector = self.collector_login()
+
+                if collector is not None:
+                    self.collector_menu(collector)
+
+            elif choice == "4":
+
+                print("\nGoodbye! Thank you for visiting Bin&Win.")
+                break
+
+            else: print("\nInvalid choice!")
 
 system = RecyclingSystem()
 system.run()
