@@ -57,8 +57,6 @@ class User(Person):
       if points > 0:
         self.__points -= points
 
-        if self.__points < 0:
-            self.__points = 0
 
     def show_profile(self):
         print('\n---- PROFILE ----')
@@ -99,7 +97,7 @@ class User(Person):
 
     def recycling_request(self, system):
 
-        print("\n===== MACHINE RECYCLING =====")
+        print("\n---- MACHINE RECYCLING ----")
 
         waste_name = system.choose_waste_type()
 
@@ -119,7 +117,7 @@ class User(Person):
 
         request_number = len(system.recycling_requests)
 
-        print("\n==== MACHINE REQUEST ====")
+        print("\n---- MACHINE REQUEST ----")
         print("Request created successfully")
         print(f"Request number: {request_number}")
         print(f"Waste type: {waste_name}")
@@ -131,7 +129,7 @@ class User(Person):
 
     def delivery_request(self, system):
 
-        print("\n===== DELIVERY REQUEST =====")
+        print("\n---- DELIVERY REQUEST ----")
 
         waste_name = system.choose_waste_type()
 
@@ -151,7 +149,7 @@ class User(Person):
 
         request_number = len(system.recycling_requests)
 
-        print("\n==== DELIVERY REQUEST ====")
+        print("\n---- DELIVERY REQUEST ----")
         print("Request created successfully")
         print(f"Request number: {request_number}")
         print(f"Waste type: {waste_name}")
@@ -163,7 +161,7 @@ class User(Person):
 
     def confirm_machine_request(self, system):
 
-        print("\n===== CONFIRM MACHINE REQUEST =====")
+        print("\n---- CONFIRM MACHINE REQUEST ----")
 
         found = False
 
@@ -184,9 +182,7 @@ class User(Person):
 
         try:
 
-            request_number = int(
-                input("\nEnter request number to confirm: ")
-            )
+            request_number = int(input("\nEnter request number to confirm: "))
 
             index = request_number - 1
 
@@ -211,7 +207,7 @@ class User(Person):
             request.update_status("Collected")
             self.add_points(request.points)
 
-            print("\n===== RECYCLING CONFIRMED =====")
+            print("\n---- RECYCLING CONFIRMED ----")
             print(f"Points added: {request.points}")
             print(f"Total points: {self.points}")
 
@@ -221,7 +217,7 @@ class User(Person):
 
     def view_requests(self, system):
 
-        print("\n===== MY REQUESTS =====")
+        print("\n---- MY REQUESTS ----")
 
         found = False
 
@@ -230,8 +226,8 @@ class User(Person):
             request = system.recycling_requests[i]
 
             if request.user == self.username:
-
                 found = True
+
                 request.show_request(i + 1)
 
         if not found:
@@ -240,7 +236,7 @@ class User(Person):
 
     def user_history(self, system):
 
-        print("\n===== USER HISTORY =====")
+        print("\n---- USER HISTORY ----")
 
         found = False
 
@@ -252,8 +248,7 @@ class User(Person):
 
                 found = True
 
-                print(
-                    f"{i + 1}. {request.waste_type} - {request.quantity} pieces - {request.status}")
+                print(f"{i + 1}. {request.waste_type} - {request.quantity} pieces - {request.status}")
 
         if not found:
             print("\nNo history found.")
@@ -268,7 +263,7 @@ class Collector(Person):
         super().__init__(username, password, phone)
 
     def view_pending_requests(self, system):
-        print("\n===== PENDING REQUESTS =====")
+        print("\n---- PENDING REQUESTS ----")
         found = False
         for r in range(len(system.recycling_requests)):
             request = system.recycling_requests[r]
@@ -305,7 +300,7 @@ class Collector(Person):
 
     def confirm_request(self, system):
 
-        print("\n===== CONFIRM DELIVERY REQUEST =====")
+        print("\n---- CONFIRM DELIVERY REQUEST ----")
 
         if not self.view_pending_requests(system):
             return
@@ -334,7 +329,7 @@ class Collector(Person):
 
             request.update_status("Collected")
 
-            print("===== DELIVERY CONFIRMED =====")
+            print("---- DELIVERY CONFIRMED ----")
             print(f"Waste received from: {request.user}")
             print(f"Address: {request.address}")
 
@@ -346,7 +341,7 @@ class Collector(Person):
 
     def reject_request(self, system):
 
-        print("\n===== REJECT REQUEST =====")
+        print("\n---- REJECT REQUEST ----")
 
         if not self.view_pending_requests(system):
             return
@@ -379,7 +374,7 @@ class Collector(Person):
 
             user.deduct_points(self.Penalty)
 
-            print("===== REQUEST REJECTED =====")
+            print("---- REQUEST REJECTED ----")
             print("Waste information was incorrect.")
             print(f"User: {request.user}")
             print(f"Penalty: {self.Penalty}")
@@ -514,20 +509,20 @@ class RecyclingSystem:
 
 
     def load_users(self):
-        self.users = {"Ahmed": User("Ahmed", "1234", "0654321",
+        self.users = {"Ahmed": User("Ahmed", "A@12345a", "0654321",
                                     "Ahmed@gmail.com", "Cairo", 500),
 
-                    "Aly": User("Aly", "5678", "0123456",
+                    "Aly": User("Aly", "A@56784a", "0123456",
                                 "Aly@gmail.com", "Alex", 1000),
 
-                    "Sherif": User("Sherif", "121314", "0345678",
+                    "Sherif": User("Sherif", "S@13144s", "0345678",
                                    "Sherif@gmail.com", "Aswan", 200)}
 
 
     def load_collectors(self):
-        self.collectors = {"collector1": Collector("collector1", "c10123", "01234567891"),
-                           "collector2": Collector("collector2", "c20124", "01234567892"),
-                           "collector3": Collector("collector3", "c30125", "01234567893")}
+        self.collectors = {"collector1": Collector("collector1", "C@10123c", "01234567891"),
+                           "collector2": Collector("collector2", "C@20124c", "01234567892"),
+                           "collector3": Collector("collector3", "C@30125c", "01234567893")}
 
 
     def load_rewards(self):
@@ -723,7 +718,7 @@ class RecyclingSystem:
 
     def show_rewards(self):
 
-        print("\n===== REWARDS =====\n")
+        print("\n---- REWARDS ----\n")
 
         for reward in self.rewards.values():
             reward.show()
@@ -733,7 +728,7 @@ class RecyclingSystem:
 
         while True:
 
-            print("\n==== RECYCLING MENU ====")
+            print("\n---- RECYCLING MENU ----")
 
             print("\n1. Drop off waste at machine")
             print("2. Request collector for delivery")
@@ -766,7 +761,7 @@ class RecyclingSystem:
 
         while True:
 
-            print("\n===== USER MENU =====")
+            print("\n---- USER MENU ----")
 
             print("\n1. Show Profile")
             print("2. Show Rewards")
@@ -803,7 +798,7 @@ class RecyclingSystem:
 
         while True:
 
-            print("\n===== COLLECTOR MENU =====\n")
+            print("\n---- COLLECTOR MENU ----\n")
 
             print("1. View Pending Requests")
             print("2. Confirm Delivery Request")
